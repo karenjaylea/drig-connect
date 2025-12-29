@@ -1,34 +1,52 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 
-type Announcement = {
+export type AnnouncementType = {
   id: number;
   title: string;
   message: string;
+  created_at: string;
 };
 
-const announcements: Announcement[] = [
-  {
-    id: 1,
-    title: "Road Closure",
-    message: "Main Street will be closed from 10 AM to 2 PM on 5th Jan."
-  },
-  {
-    id: 2,
-    title: "Community Meeting",
-    message: "Village Hall meeting at 7 PM on 3rd Jan."
-  }
-];
-
 export default function Announcements() {
+  const [announcements, setAnnouncements] = useState<AnnouncementType[]>([]);
+
+  useEffect(() => {
+    fetchAnnouncements();
+  }, []);
+
+  const fetchAnnouncements = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("announcements")
+        .select("*")
+        .order("created_at", { ascending: false }); // newest first
+      if (error) throw error;
+      setAnnouncements(data || []);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+    }
+  };
+
   return (
-    <div>
-      <h2>Community Updates</h2>
-      {announcements.map((a) => (
-        <div key={a.id} style={{ border: "1px solid #ccc", padding: "8px", margin: "8px 0" }}>
-          <strong>{a.title}</strong>
-          <p>{a.message}</p>
-        </div>
-      ))}
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold text-gray-900">Community Updates</h2>
+      {announcements.length === 0 ? (
+        <p className="text-gray-700 text-lg">No announcements at the moment.</p>
+      ) : (
+        announcements.map((a) => (
+          <div
+            key={a.id}
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-4"
+          >
+            <strong className="text-lg">{a.title}</strong>
+            <p className="text-gray-700 mt-1">{a.message}</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Posted on {new Date(a.created_at).toLocaleString()}
+            </p>
+          </div>
+        ))
+      )}
     </div>
   );
 }
