@@ -109,7 +109,7 @@ function App() {
                 <Home className="w-10 h-10 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-gray-900">Village Connect</h1>
+                <h1 className="text-4xl font-bold text-gray-900">Drig Connect</h1>
                 <p className="text-lg text-gray-700">Stay connected with your community</p>
               </div>
             </div>
