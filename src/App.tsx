@@ -1,3 +1,4 @@
+import Announcements from "./components/Announcements";
 import { useState, useEffect } from 'react';
 import { Home, CalendarDays } from 'lucide-react';
 import { supabase, Event, Reminder } from './lib/supabase';
