@@ -103,7 +103,7 @@ function App() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="bg-blue-500 p-4 rounded-xl">
                 <Home className="w-10 h-10 text-white" />
@@ -113,10 +113,12 @@ function App() {
                 <p className="text-lg text-gray-700">Stay connected with your community</p>
               </div>
             </div>
-            <div className="flex gap-2">
+
+            {/* Buttons stacked on mobile */}
+            <div className="flex flex-col gap-2 w-full sm:flex-row sm:w-auto">
               <button
                 onClick={() => setView('calendar')}
-                className={`px-6 py-3 rounded-lg font-semibold text-lg transition-colors ${
+                className={`px-6 py-3 rounded-lg font-semibold text-lg transition-colors w-full sm:w-auto ${
                   view === 'calendar' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -124,7 +126,7 @@ function App() {
               </button>
               <button
                 onClick={() => { setView('list'); setSelectedDate(null); }}
-                className={`px-6 py-3 rounded-lg font-semibold text-lg transition-colors ${
+                className={`px-6 py-3 rounded-lg font-semibold text-lg transition-colors w-full sm:w-auto ${
                   view === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
