@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Home, CalendarDays } from "lucide-react";
-import { supabase, Event, Reminder } from "./lib/supabase";
+import { supabase, Event } from "./lib/supabase";
 import { Calendar } from "./components/Calendar";
 import { EventCard } from "./components/EventCard";
 import { EventModal } from "./components/EventModal";
-import Announcements, { AnnouncementType } from "./components/Announcements";
+import Announcements from "./components/Announcements";
 
 function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -12,17 +12,12 @@ function App() {
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"calendar" | "list">("calendar");
 
   useEffect(() => {
     fetchEvents();
   }, []);
-
-  useEffect(() => {
-    if (selectedEvent) fetchRemindersForEvent(selectedEvent.id);
-  }, [selectedEvent]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -33,15 +28,11 @@ function App() {
       );
     } else {
       const today = new Date();
-      const upcoming = events.filter((event) => {
-        const eventDate = new Date(event.event_date);
-        return eventDate >= today;
-      });
+      const upcoming = events.filter((event) => new Date(event.event_date) >= today);
       setFilteredEvents(
         upcoming.sort((a, b) => {
           const dateCompare = a.event_date.localeCompare(b.event_date);
-          if (dateCompare !== 0) return dateCompare;
-          return a.event_time.localeCompare(b.event_time);
+          return dateCompare !== 0 ? dateCompare : a.event_time.localeCompare(b.event_time);
         })
       );
     }
@@ -60,44 +51,6 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fetchRemindersForEvent = async (eventId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("reminders")
-        .select("*")
-        .eq("event_id", eventId)
-        .eq("is_active", true);
-      if (error) throw error;
-      setReminders(data || []);
-    } catch (error) {
-      console.error("Error fetching reminders:", error);
-    }
-  };
-
-  const handleSetReminder = async (
-    eventId: string,
-    minutes: number,
-    userIdentifier: string
-  ) => {
-    const { error } = await supabase.from("reminders").insert({
-      event_id: eventId,
-      reminder_minutes: minutes,
-      user_identifier: userIdentifier,
-      is_active: true,
-    });
-    if (error) throw error;
-    await fetchRemindersForEvent(eventId);
-  };
-
-  const handleRemoveReminder = async (reminderId: string) => {
-    const { error } = await supabase.from("reminders").delete().eq("id", reminderId);
-    if (error) {
-      console.error("Error removing reminder:", error);
-      return;
-    }
-    if (selectedEvent) await fetchRemindersForEvent(selectedEvent.id);
   };
 
   const handlePrevMonth = () => {
@@ -140,7 +93,6 @@ function App() {
               </div>
             </div>
 
-            {/* Buttons stacked on mobile */}
             <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
               <button
                 onClick={() => setView("calendar")}
@@ -288,6 +240,16 @@ function App() {
                 Northern PowerGrid – emergency power issues
               </a>
             </li>
+            <li>
+              ⛪{" "}
+              <a
+                href="https://drighlingtonparishcouncil.gov.uk/council/agendas-and-minutes/full-parish-council-meetings"
+                target="_blank"
+                className="text-blue-600 hover:underline"
+              >
+                Drighlington Parish Council Minutes & Agendas
+              </a>
+            </li>
           </ul>
         </div>
       </main>
@@ -295,13 +257,7 @@ function App() {
       {selectedEvent && (
         <EventModal
           event={selectedEvent}
-          onClose={() => {
-            setSelectedEvent(null);
-            setReminders([]);
-          }}
-          onSetReminder={handleSetReminder}
-          reminders={reminders}
-          onRemoveReminder={handleRemoveReminder}
+          onClose={() => setSelectedEvent(null)}
         />
       )}
     </div>
